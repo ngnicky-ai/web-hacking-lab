@@ -66,7 +66,6 @@
 # 정상적인 파라미터(admin=0)로 요청 전송
 curl -s \
      -b /home/kali/docker_exam/bwapp_cookie.txt \
-     -c /home/kali/docker_exam/bwapp_cookie.txt \
      "http://192.168.0.20/bWAPP/smgmt_admin_portal.php?admin=0" | grep -i "locked"
 ```
 
