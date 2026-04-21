@@ -24,10 +24,11 @@
 - **[XSS - Stored (Blog)](bWAPP_XSS_Stored.md)**: `xss_stored_1.php` / iFrame 주입을 통한 세션(Session) 하이재킹 및 **BeEF 프레임워크** 기반의 좀비 브라우저 후킹 실습
 
 ### 🛡️ 3. 파일 및 권한 제어 취약점 (RCE 우회)
-안전하지 않은 서버 구성이나 파일 처리 방식을 이용해 백도어를 설치합니다.
-- **[Unrestricted File Upload (악성 웹쉘 업로드)](bWAPP_Unrestricted_File_Upload.md)**: `unrestricted_file_upload.php` / 파일 확장자 검증 우회 및 PHP 웹쉘(Webshell) 연동
-- **[Remote & Local File Inclusion (RFI/LFI)](bWAPP_LFI_RFI.md)**: `rlfi.php` / `data://` wrapper를 응용한 서버 원격 명령 실행 및 Path Traversal 공격
-- **[XML External Entity Attacks (XXE)](bWAPP_XXE_Injection.md)**: `xxe-1.php` / XML DTD(External Entity) 취약 파서를 악용한 로컬 파일(`/etc/passwd`) 병합 탈취
+안전하지 않은 서버 구성이나 파일 처리 방식을 이용해 백도어를 설치하거나 중요 파일을 탈취합니다.
+- **[Unrestricted File Upload (악성 웹쉘 업로드)](bWAPP_Unrestricted_File_Upload.md)**: `unrestricted_file_upload.php` / 파일 확장자 검증 우회 및 PHP 웹쉘 연동
+- **[Directory Traversal (경로 탐색)](bWAPP_Directory_Traversal.md)**: `directory_traversal_1.php` / 서버 파일 시스템의 상위 경로(`../`) 우회를 통한 `/etc/passwd` 탈취
+- **[Remote & Local File Inclusion (RFI/LFI)](bWAPP_LFI_RFI.md)**: `rlfi.php` / `data://` wrapper를 응용한 서버 원격 명령 실행 및 Path Traversal 연계 공격
+- **[XML External Entity Attacks (XXE)](bWAPP_XXE_Injection.md)**: `xxe-1.php` / XML DTD 취약 파서를 악용한 로컬 파일 병합 탈취
 
 ### 🛡️ 4. 서버 설정 및 논리 오류 (Misconfiguration)
 권한 검증이 완전하지 않거나 옛 버전의 취약한 컴포넌트 오류를 직접 타격합니다.
